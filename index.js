@@ -14,5 +14,6 @@ module.exports = class S3ZipModifier {
     async saveToS3({ bucket, key }) {
         const modifiedZip = await this.zipModifier.exportZip();
         await s3.putObject({ Bucket: bucket, Key: key, Body: modifiedZip }).promise();
+        return { bucket, key };
     }
 }
