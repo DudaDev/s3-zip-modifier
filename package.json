@@ -1,0 +1,24 @@
+{
+  "name": "@dudadev/s3-zip-modifier",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DudaDev/s3-zip-modifier.git"
+  },
+  "author": "duda",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DudaDev/s3-zip-modifier/issues"
+  },
+  "homepage": "https://github.com/DudaDev/s3-zip-modifier#readme",
+  "dependencies": {
+    "@dudadev/zip-modifier": "^1.1.1",
+    "aws-sdk": "^2.599.0"
+  },
+  "private": false
+}
