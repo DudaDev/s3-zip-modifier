@@ -70,9 +70,14 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
 }
 
 function log(verbose, level, ...messages) {
-  if (level === "debug" && verbose && verbose !== "minimal") {
-    console.log(...messages);
-  } else if (verbose) {
+  if (!verbose) {
+    return;
+  }
+  if (verbose === "minimal") {
+    if (level !== "debug") {
+      console.log(...messages);
+    }
+  } else {
     console.log(...messages);
   }
 }
