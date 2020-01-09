@@ -35,6 +35,7 @@ async function readZipFromData(data) {
 }
 
 async function itearateZip(zipData, modifiers = [], verbose = false) {
+  const logMessage = log.bind(null, verbose);
   const modifiersData = [].concat(modifiers);
   const arr = [];
 
@@ -44,13 +45,12 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
 
   await arr.reduce(async (acc, { relativePath, file }) => {
     await acc;
-    verbose && verbose !== 'minimal' && console.log("iterating", relativePath);
+    logMessage("debug", "iterating", relativePath);
     // check if a modifier requires this file
     const filteredModifiers = modifiersData.filter(
       ({ test }) => !!test(relativePath)
     );
     if (filteredModifiers.length) {
-      verbose && console.log("modifying", relativePath);
       const initialContent = await file.async("string");
       // run modifiers
       const result = filteredModifiers.reduce(
@@ -59,10 +59,20 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
       );
       if (result !== initialContent) {
         // update zip file
+        logMessage("info", "modifying", relativePath);
         zipData.file(relativePath, result);
       } else if (result === null || result === "") {
+        logMessage("info", "removing", relativePath);
         zipData.remove(relativePath);
       }
     }
   }, Promise.resolve());
+}
+
+function log(verbose, level, ...messages) {
+  if (level === "debug" && verbose && verbose !== "minimal") {
+    console.log(...messages);
+  } else if (verbose) {
+    console.log(...messages);
+  }
 }
