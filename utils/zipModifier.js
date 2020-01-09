@@ -44,7 +44,7 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
 
   await arr.reduce(async (acc, { relativePath, file }) => {
     await acc;
-    verbose && console.log("iterating", relativePath);
+    verbose && verbose !== 'minimal' && console.log("iterating", relativePath);
     // check if a modifier requires this file
     const filteredModifiers = modifiersData.filter(
       ({ test }) => !!test(relativePath)
