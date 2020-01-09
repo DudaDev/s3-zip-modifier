@@ -62,7 +62,7 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
         (content, { modifier }) => modifier(content, relativePath),
         initialContent
       );
-      if (result) {
+      if (result !== initialContent) {
         // update zip file
         zipData.file(relativePath, result);
       } else if (result === null || result === '') {
