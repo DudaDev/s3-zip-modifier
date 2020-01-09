@@ -17,21 +17,23 @@ module.exports = class ZipModifier {
     this.zipData = await readZipFromData(zipFileContents);
   }
 
-  async modifyFiles (predicate, modifier) {
-    await this.iterateAllFiles([{
+  async modifyFiles(predicate, modifier) {
+    await this.iterateAllFiles([
+      {
         test: predicate,
         modifier
-    }])
+      }
+    ]);
   }
 
-  async iterateAllFiles (modifiers) {
+  async iterateAllFiles(modifiers) {
     await itearateZip(this.zipData, modifiers, this.verbose);
   }
 
   async exportZip() {
     return this.zipData.generateAsync(COMPRESSION_OPTIONS);
   }
-}
+};
 
 async function readZipFromData(data) {
   return await new JSZip().loadAsync(data, { createFolders: true });
@@ -53,7 +55,7 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
       ({ test }) => !!test(relativePath)
     );
     if (filteredModifiers.length) {
-        verbose && console.log("modifying", relativePath);
+      verbose && console.log("modifying", relativePath);
       const initialContent = await file.async("string");
       // run modifiers
       const result = filteredModifiers.reduce(
