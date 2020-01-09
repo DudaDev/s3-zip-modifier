@@ -17,13 +17,8 @@ module.exports = class ZipModifier {
     this.zipData = await readZipFromData(zipFileContents);
   }
 
-  async modifyFiles(predicate, modifier) {
-    await this.iterateAllFiles([
-      {
-        test: predicate,
-        modifier
-      }
-    ]);
+  async modifyFiles(test, modifier) {
+    await this.iterateAllFiles([{ test, modifier }]);
   }
 
   async iterateAllFiles(modifiers) {
@@ -65,7 +60,7 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
       if (result !== initialContent) {
         // update zip file
         zipData.file(relativePath, result);
-      } else if (result === null || result === '') {
+      } else if (result === null || result === "") {
         zipData.remove(relativePath);
       }
     }
