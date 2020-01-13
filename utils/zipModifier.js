@@ -58,11 +58,11 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
         Promise.resolve(initialContent)
       );
       
-      if (result !== initialContent) {
+      if ((typeof result === 'string') && (result !== initialContent)) {
         // update zip file
         logMessage("info", "modifying", relativePath);
         zipData.file(relativePath, result);
-      } else if (result === null || result === "") {
+      } else if (!result) {
         logMessage("info", "removing", relativePath);
         zipData.remove(relativePath);
       }
