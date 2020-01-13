@@ -25,6 +25,32 @@ module.exports = class ZipModifier {
     await itearateZip(this.zipData, modifiers, this.verbose);
   }
 
+  async addFile(path, content) {
+    return this.zipData.file(path, await content);
+  }
+
+  async removeFile(path) {
+    return this.zipData.remove(path);
+  }
+
+  async copyFile(origPath, destPath) {
+    const origFile = this.zipData.file(origPath);
+    if (origFile) {
+      this.zipData.file(destPath, await fileContents(origFile));
+      return this.zipData.file(destPath);
+    }
+  }
+
+  async getFiles(path) {
+    return Promise.all(
+      [].concat(this.zipData.file(path) || []).map(fileContents)
+    );
+  }
+
+  async fileContents(file, type = "string") {
+    return fileContents(file, type);
+  }
+
   async exportZip() {
     return this.zipData.generateAsync(COMPRESSION_OPTIONS);
   }
@@ -32,6 +58,14 @@ module.exports = class ZipModifier {
 
 async function readZipFromData(data) {
   return await new JSZip().loadAsync(data, { createFolders: true });
+}
+
+async function fileContents(file, type = "string") {
+  if (file) {
+    return await file.async(type);
+  } else {
+    return "";
+  }
 }
 
 async function itearateZip(zipData, modifiers = [], verbose = false) {
@@ -51,14 +85,14 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
       ({ test }) => !!test(relativePath)
     );
     if (filteredModifiers.length) {
-      const initialContent = await file.async("string");
+      const initialContent = await fileContents(file);
       // run modifiers
       const result = await filteredModifiers.reduce(
         async (content, { modifier }) => modifier(await content, relativePath),
         Promise.resolve(initialContent)
       );
-      
-      if ((typeof result === 'string') && (result !== initialContent)) {
+
+      if (typeof result === "string" && result !== initialContent) {
         // update zip file
         logMessage("info", "modifying", relativePath);
         zipData.file(relativePath, result);
