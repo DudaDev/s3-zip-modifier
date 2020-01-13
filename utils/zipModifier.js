@@ -27,12 +27,12 @@ module.exports = class ZipModifier {
   }
 
   async addFile(path, content) {
-    this.log("info", "adding", path);
+    this.log(["adding", path]);
     return this.zipData.file(path, await content);
   }
 
   async removeFile(path) {
-    this.log("info", "removing", path);
+    this.log(["removing", path]);
     return this.zipData.remove(path);
   }
 
@@ -40,7 +40,7 @@ module.exports = class ZipModifier {
     const origFile = this.zipData.file(origPath);
     if (origFile) {
       this.zipData.file(destPath, await fileContents(origFile));
-      this.log("info", "copying", origPath, "->", destPath);
+      this.log(["copying", origPath, "->", destPath]);
       return this.zipData.file(destPath);
     }
   }
@@ -83,7 +83,7 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
 
   await arr.reduce(async (acc, { relativePath, file }) => {
     await acc;
-    logMessage("debug", "iterating", relativePath);
+    logMessage(["iterating", relativePath], "debug");
     // check if a modifier requires this file
     const filteredModifiers = modifiersData.filter(
       ({ test }) => !!test(relativePath)
@@ -98,17 +98,17 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
 
       if (typeof result === "string" && result !== initialContent) {
         // update zip file
-        logMessage("info", "modifying", relativePath);
+        logMessage(["modifying", relativePath]);
         zipData.file(relativePath, result);
       } else if (!result) {
-        logMessage("info", "removing", relativePath);
+        logMessage(["removing", relativePath]);
         zipData.remove(relativePath);
       }
     }
   }, Promise.resolve());
 }
 
-function log(verbose, level, ...messages) {
+function log(verbose, messages = [], level = "info") {
   if (!verbose) {
     return;
   }
