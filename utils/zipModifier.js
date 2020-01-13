@@ -11,6 +11,7 @@ const COMPRESSION_OPTIONS = {
 module.exports = class ZipModifier {
   constructor({ verbose } = {}) {
     this.verbose = verbose;
+    this.log = log.bind(null, this.verbose);
   }
 
   async loadZip(zipFileContents) {
@@ -26,10 +27,12 @@ module.exports = class ZipModifier {
   }
 
   async addFile(path, content) {
+    this.log("info", "adding", path);
     return this.zipData.file(path, await content);
   }
 
   async removeFile(path) {
+    this.log("info", "removing", path);
     return this.zipData.remove(path);
   }
 
@@ -37,6 +40,7 @@ module.exports = class ZipModifier {
     const origFile = this.zipData.file(origPath);
     if (origFile) {
       this.zipData.file(destPath, await fileContents(origFile));
+      this.log("info", "copying", origPath, "->", destPath);
       return this.zipData.file(destPath);
     }
   }
