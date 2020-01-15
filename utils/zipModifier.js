@@ -33,16 +33,18 @@ module.exports = class ZipModifier {
 
   async removeFile(path) {
     this.log(["removing", path]);
-    return this.zipData.remove(path);
+    return this.modifyFiles(path, () => '');
   }
 
-  async copyFile(origPath, destPath) {
-    const origFile = this.zipData.file(origPath);
-    if (origFile) {
-      this.zipData.file(destPath, await fileContents(origFile));
-      this.log(["copying", origPath, "->", destPath]);
-      return this.zipData.file(destPath);
-    }
+  async copyFile(origPath, destPathCreator) {
+    this.modifyFiles(origPath, async (contents, filePath) => {
+      const origFile = this.zipData.file(filePath);
+      const destPath = typeof destPathCreator === "function" ? destPathCreator(filePath) : destPathCreator;
+      if (origFile) {
+        this.zipData.file(destPath, await fileContents(origFile));
+        this.log(["copying", filePath, "->", destPath]);
+      }
+    });
   }
 
   async getFiles(path) {
@@ -51,7 +53,7 @@ module.exports = class ZipModifier {
     );
   }
 
-  async fileContents(file, type = "string") {
+  async fileContents(file, type) {
     return fileContents(file, type);
   }
 
@@ -85,8 +87,8 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
     await acc;
     logMessage(["iterating", relativePath], "debug");
     // check if a modifier requires this file
-    const filteredModifiers = modifiersData.filter(
-      ({ test }) => !!test(relativePath)
+    const filteredModifiers = modifiersData.filter(({ test }) =>
+      testPath(test, relativePath)
     );
     if (filteredModifiers.length) {
       const initialContent = await fileContents(file);
@@ -106,6 +108,18 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
       }
     }
   }, Promise.resolve());
+}
+
+function testPath(test = "", path) {
+  if (typeof test === "string") {
+    return new RegExp(test.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")).test(
+      path
+    );
+  } else if (typeof test === "function") {
+    return Boolean(test(path));
+  } else if (test instanceof RegExp) {
+    return test.test(path);
+  }
 }
 
 function log(verbose, messages = [], level = "info") {
