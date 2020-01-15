@@ -40,7 +40,7 @@ module.exports = class ZipModifier {
     this.modifyFiles(origPath, async (contents, filePath) => {
       const origFile = this.zipData.file(filePath);
       const destPath = typeof destPathCreator === "function" ? destPathCreator(filePath) : destPathCreator;
-      if (origFile) {
+      if (origFile && destPath) {
         this.zipData.file(destPath, await fileContents(origFile));
         this.log(["copying", filePath, "->", destPath]);
       }
