@@ -18,8 +18,8 @@ module.exports = class ZipModifier {
     this.zipData = await readZipFromData(zipFileContents);
   }
 
-  async modifyFiles(test, modifier) {
-    await this.iterateAllFiles([{ test, modifier }]);
+  async modifyFiles(test, modifier, message = "") {
+    await this.iterateAllFiles([{ test, modifier, message }]);
   }
 
   async iterateAllFiles(modifiers) {
@@ -33,13 +33,16 @@ module.exports = class ZipModifier {
 
   async removeFile(path) {
     this.log(["removing", path]);
-    return this.modifyFiles(path, () => '');
+    return this.modifyFiles(path, () => "");
   }
 
   async copyFile(origPath, destPathCreator) {
     this.modifyFiles(origPath, async (contents, filePath) => {
       const origFile = this.zipData.file(filePath);
-      const destPath = typeof destPathCreator === "function" ? destPathCreator(filePath) : destPathCreator;
+      const destPath =
+        typeof destPathCreator === "function"
+          ? destPathCreator(filePath)
+          : destPathCreator;
       if (origFile && destPath) {
         this.zipData.file(destPath, await fileContents(origFile));
         this.log(["copying", filePath, "->", destPath]);
@@ -100,9 +103,13 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
 
       if (typeof result === "string" && result !== initialContent) {
         // update zip file
-        logMessage(["modifying", relativePath]);
+        logMessage([
+          "modifying",
+          relativePath,
+          filteredModifiers.map(mod => mod.message || "modifier").join("->")
+        ]);
         zipData.file(relativePath, result);
-      } else if (result === '' || result === null) {
+      } else if (result === "" || result === null) {
         logMessage(["removing", relativePath]);
         zipData.remove(relativePath);
       }
