@@ -102,7 +102,7 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
         // update zip file
         logMessage(["modifying", relativePath]);
         zipData.file(relativePath, result);
-      } else if (!result) {
+      } else if (result === '' || result === null) {
         logMessage(["removing", relativePath]);
         zipData.remove(relativePath);
       }
