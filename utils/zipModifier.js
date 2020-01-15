@@ -36,17 +36,20 @@ module.exports = class ZipModifier {
   }
 
   async copyFile(origPath, destPathCreator) {
-    this.modifyFiles(origPath, async (contents, filePath) => {
+    const data = {};
+    await this.modifyFiles(origPath, async (contents, filePath) => {
       const destPath =
         typeof destPathCreator === "function"
           ? destPathCreator(filePath)
           : destPathCreator;
       if (destPath) {
-        await this.zipData.file(destPath, contents);
-        console.log(destPath, contents.substring(0, 30));
-        this.log(["copying", filePath, "->", destPath]);
+        data[filePath] = [destPath, contents];
       }
     });
+    Object.entries(data).forEach(([filePath, [destPath, contents]]) => {
+      await this.zipData.file(destPath, contents);
+      this.log(["copying", filePath, "->", destPath]);
+    })
   }
 
   async getFiles(path) {
