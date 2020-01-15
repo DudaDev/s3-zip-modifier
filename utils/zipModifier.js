@@ -42,7 +42,7 @@ module.exports = class ZipModifier {
           ? destPathCreator(filePath)
           : destPathCreator;
       if (destPath) {
-        this.zipData.file(destPath, contents);
+        await this.zipData.file(destPath, contents);
         console.log(destPath, contents.substring(0, 30));
         this.log(["copying", filePath, "->", destPath]);
       }
