@@ -47,7 +47,7 @@ module.exports = class ZipModifier {
       }
     });
     Object.entries(data).forEach(([filePath, [destPath, contents]]) => {
-      await this.zipData.file(destPath, contents);
+      this.zipData.file(destPath, contents);
       this.log(["copying", filePath, "->", destPath]);
     })
   }
