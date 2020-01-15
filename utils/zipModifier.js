@@ -106,7 +106,7 @@ async function itearateZip(zipData, modifiers = [], verbose = false) {
         logMessage([
           "modifying",
           relativePath,
-          filteredModifiers.map(mod => mod.message || "modifier").join("->")
+          `(${filteredModifiers.map(mod => mod.message || "modifier").join("->")})`
         ]);
         zipData.file(relativePath, result);
       } else if (result === "" || result === null) {
