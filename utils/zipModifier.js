@@ -26,25 +26,24 @@ module.exports = class ZipModifier {
     await itearateZip(this.zipData, modifiers, this.verbose);
   }
 
-  async addFile(path, content) {
-    this.log(["adding", path]);
+  async addFile(path, content, message = "") {
+    this.log(["adding", path, message]);
     return this.zipData.file(path, await content);
   }
 
-  async removeFile(path) {
-    this.log(["removing", path]);
-    return this.modifyFiles(path, () => "");
+  async removeFile(path, message = "") {
+    return this.modifyFiles(path, () => "", message);
   }
 
   async copyFile(origPath, destPathCreator) {
     this.modifyFiles(origPath, async (contents, filePath) => {
-      const origFile = this.zipData.file(filePath);
       const destPath =
         typeof destPathCreator === "function"
           ? destPathCreator(filePath)
           : destPathCreator;
-      if (origFile && destPath) {
-        this.zipData.file(destPath, await fileContents(origFile));
+      if (destPath) {
+        this.zipData.file(destPath, contents);
+        console.log(destPath, contents.substring(0, 30));
         this.log(["copying", filePath, "->", destPath]);
       }
     });
